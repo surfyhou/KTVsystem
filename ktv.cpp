@@ -205,7 +205,14 @@ BOOL schtit(char oldpath[], const char *mlib){
 
 	return 0;
 }
-BOOL schart(){
+BOOL schart(char oldpath[], const char *mlib){
+	FILE *fpschart;
+	const char *filepath = strcat(oldpath, mlib);
+	if ((fpschart = fopen(filepath, "r")) == NULL){
+		printf("Cannot open music library, strike any key to exit.\n");
+		getchar();
+		return 0;
+	}
 	return 0;
 }
 

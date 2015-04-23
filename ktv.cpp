@@ -193,13 +193,20 @@ BOOL reflib(){
 	
 }
 
-BOOL schtit(){
+BOOL schtit(char oldpath[], const char *mlib){
+	FILE *fpschtit;
+	const char *filepath = strcat(oldpath, mlib);
+	if ((fpschtit = fopen(filepath, "r")) == NULL){
+		printf("Cannot open music library, strike any key to exit.\n");
+		getchar();
+		return 0;
+	}
+
+
+
 	return 0;
 }
-<<<<<<< HEAD
 
-BOOL schart(){
-=======
 BOOL schart(char oldpath[], const char *mlib){
 	FILE *fpschart;
 	const char *filepath = strcat(oldpath, mlib);
@@ -208,7 +215,6 @@ BOOL schart(char oldpath[], const char *mlib){
 		getchar();
 		return 0;
 	}
->>>>>>> origin/master
 	return 0;
 }
 

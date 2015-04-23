@@ -196,8 +196,19 @@ BOOL reflib(){
 BOOL schtit(){
 	return 0;
 }
+<<<<<<< HEAD
 
 BOOL schart(){
+=======
+BOOL schart(char oldpath[], const char *mlib){
+	FILE *fpschart;
+	const char *filepath = strcat(oldpath, mlib);
+	if ((fpschart = fopen(filepath, "r")) == NULL){
+		printf("Cannot open music library, strike any key to exit.\n");
+		getchar();
+		return 0;
+	}
+>>>>>>> origin/master
 	return 0;
 }
 

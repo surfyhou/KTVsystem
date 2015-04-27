@@ -4,7 +4,7 @@
 #include   <windows.h>
 #define MAX 100
 
-struct tanda{
+struct titleandartists{
 	WCHAR artist[31];
 	WCHAR title[31];
 }standa[MAX];
@@ -139,10 +139,8 @@ FILENODE*  getFiles(char *dir)
 	return filesNode;
 }
 
-BOOL reflib(){
+BOOL reflib(char oldpath[], const char *mlib){
 	//library path changing
-	char oldpath[260] = "C:\\Users\\Surfy\\Desktop\\musicfortest\\";
-	const char *mlib = "zmusiclib.txt";
 	int len_of_op=strlen(oldpath);
 	printf("Refresh library starts.\n");
 	printf("Music library is at %s\nIf you want to change it, press 'y', or anykey else to continue\n", oldpath);
@@ -159,13 +157,13 @@ BOOL reflib(){
 
 	if (filesNode == NULL)
 	{
-		printf("get file failed");
+		printf("get file failed\n");
 		return 0;
 	}
 	FILE *fp;
 	const char *filepath = strcat(oldpath, mlib);
 	if ((fp = fopen(filepath, "r+")) == NULL){
-		printf("Cannot open music library,strike any key to exit.");
+		printf("Cannot open music library,strike any key to exit.\n");
 		getchar();
 		return 0;
 	}
@@ -174,15 +172,16 @@ BOOL reflib(){
 	while (filesNode)
 	{
 		strcat(newpath, filesNode->filename);
-		GetMp3Info(c2w(newpath), mp3infow);
-		fwprintf(fp, mp3infow->Title);
-		fprintf(fp, " | ");
-		fwprintf(fp, mp3infow->Artist);
-		fprintf(fp, "\n");
-		filesNode = filesNode->next;
-		for (int count = 36; count < 260; count++){
-			newpath[count] = '\0';
+		if ((filesNode->filename) != "zmusiclib.txt" && (GetMp3Info(c2w(newpath), mp3infow) == TRUE)) {
+			fwprintf(fp, mp3infow->Title);
+			fprintf(fp, " | ");
+			fwprintf(fp, mp3infow->Artist);
+			fprintf(fp, "\n");
+			for (int count = 36; count < 260; count++){
+				newpath[count] = '\0';
+			}
 		}
+		filesNode = filesNode->next;
 		
 	}
 	sofs--;
@@ -207,6 +206,22 @@ BOOL schtit(char oldpath[], const char *mlib){
 	return 0;
 }
 
+int search(char str[], char strf[]){
+    #define NOTFOUND 0
+	int i, j, flag = 0;
+	for (j = 0; j < strlen(str); j++){
+		if (str[j] == strf[0]){
+			for (i = 1; i < strlen(strf) && str[i + j] == str[i]; i++){
+				if (i == strlen(strf)){
+					flag++;
+					break;
+				}
+			}
+		}
+	}
+	if (flag == 0) return NOTFOUND;
+}
+
 BOOL schart(char oldpath[], const char *mlib){
 	FILE *fpschart;
 	const char *filepath = strcat(oldpath, mlib);
@@ -215,20 +230,20 @@ BOOL schart(char oldpath[], const char *mlib){
 		getchar();
 		return 0;
 	}
+	//insert code here
 	return 0;
 }
 
 int  main()
 {
 	        int order;
-orderLOOP:	printf("Please press 1 for refresh the library, 2 for search by title, 3 for search by artists or q to quit.\n");
+			char oldpath[260] = "C:\\Users\\Surfy\\Desktop\\musicfortest\\";
+			const char *mlib = "zmusiclib.txt";
+orderLOOP:	printf("Please press:\n1 for refresh the library.\n2 for search by title.\n3 for search by artists.\norany other key to quit.\n");
 	        order = getchar();
 			fflush(stdin);
-			if (order == 'q'){
-				return 0;
-			}
-			else if (order == 49){
-				if (!reflib()){
+			if (order == 49){
+				if (!reflib(oldpath, mlib)){
 					printf("refresh music library failed. strike anykey to exit.\n");
 					getchar();
 					exit(1);
@@ -239,6 +254,7 @@ orderLOOP:	printf("Please press 1 for refresh the library, 2 for search by title
 	        }
 	        else if (order == 50){
 		        //search by title
+				schtit(oldpath, mlib);
 				fflush(stdin);
 				goto orderLOOP;
 	        }
@@ -248,8 +264,8 @@ orderLOOP:	printf("Please press 1 for refresh the library, 2 for search by title
 				goto orderLOOP;
 	        }
 	        else{
-		        printf("OOPS! please input a number between 1 and 3.\n\n\n");
-		        goto orderLOOP;
+				return 0;
+
 	        }
 
 

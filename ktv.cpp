@@ -48,6 +48,23 @@ wchar_t* c2w(const char *str)
 	return t;
 }
 
+/*截取src字符串中,从下标为start开始到结尾的字符串保存在dest中(下标从0开始)*/
+void substring(char *dest, char *src, int start,int end)
+{
+	char *p = src;
+	int i = start;
+	if (start>strlen(src))return;
+	if (end > strlen(src)) end = strlen(src);
+	while (i<end)
+	{
+		dest[i - start] = src[i];
+		i++;
+	}
+	//dest[i - start] = '/0';
+
+	return;
+}
+
 BOOL GetMp3Info(const WCHAR *path, MP3INFOW *infw)
 {
 	char temp[31];
@@ -143,6 +160,28 @@ FILENODE*  getFiles(char *dir)
 	return filesNode;
 }
 
+BOOL readlrc(char lrcpath[]){
+	//Lysics *lysics;
+	FILE *lrc;
+	char lysic_in[100] = { '\0' };
+	char lysic_out[100] = { '\0' };
+	if ((lrc = fopen(lrcpath, "r")) == NULL){
+		printf("Cannot open lrc file, strike any key to exit.\n");
+		getchar();
+		exit(1);
+	}
+	printf("\n\n\n");
+	for (int count = 0; !feof(lrc); count++){
+		fgets(lysic_in, 100, lrc);
+		if (lysic_in[1] == '0'&&lysic_in[10] != '\0'&&lysic_in[10] != '\n'&&lysic_in[10] != '.'){
+			substring(lysic_out, lysic_in, 10, strlen(lysic_in));
+			printf("          %s\n", lysic_out);
+			Sleep(1000);
+		}
+		memset(lysic_out, 0, 100);		
+	}
+}
+
 BOOL reflib(char oldpath[], const char *mlib){
 	//library path changing
 	FILE *fp;
@@ -194,8 +233,6 @@ BOOL reflib(char oldpath[], const char *mlib){
 		_sofs++;
 
 	}
-	//sofs--;
-	//fwprintf(fp, mp3infow->Artist);
 	fclose(fp);
 	printf("Refresh music library success!\n///////////////////////////////////////////\n");
 	return 1;
@@ -225,7 +262,6 @@ BOOL schtit(char oldpath[], const char *mlib){
 	FILE *fpschtit;
 	int count = 0;
 	char str_to_temp[63];
-	int got[MAX] = { 0 };
 	char tosch_tit[31];
 	const char *filepath = strcat(oldpath, mlib);
 
@@ -247,7 +283,15 @@ BOOL schtit(char oldpath[], const char *mlib){
 	if (flag_find){
 		//play that music and roll lysics.
 		//play();
+
 		//rolllysic();
+		const char* lrc = ".lrc";
+		char newpath[260];
+		substring(newpath, oldpath, 0, strlen(oldpath) - 13);
+		strcat(oldpath, tosch_tit);
+		strcat(oldpath, lrc);
+		readlrc(oldpath);
+
 	}
 	else if (!flag_find){
 		printf("Not found, press any key to the menu.\n");
@@ -259,7 +303,6 @@ BOOL schtit(char oldpath[], const char *mlib){
 		getchar();
 		exit(1);
 	}
-	//insert code here
 	return 0;
 }
 
@@ -268,8 +311,9 @@ BOOL schart(char oldpath[], const char *mlib){
 	int count = 0;
 	bool flag_find = NOTFOUND;
 	char str_to_temp[63];
-	int got[MAX] = { 0 };
+	//int got[MAX] = { 0 };
 	char tosch_art[31];
+	//char sched[63];
 	const char *filepath = strcat(oldpath, mlib);
 
 	printf("Please input the artist's name to search his/her musics.\n");
@@ -279,26 +323,32 @@ BOOL schart(char oldpath[], const char *mlib){
 		getchar();
 		exit(1);
 	}
-	
+	//原来，只有神和我知道下面这段的意思。
+	//现在，只有神知道。
+	//2015/5/4
 	for (count = 1; !feof(fpschart); count++) {
 		fgets(str_to_temp, 63, fpschart);
 		if (search(str_to_temp, tosch_art)){
-			got[str_to_temp[0]-48]++;
+			//got[str_to_temp[0]-48]++;
 			printf("%c:", str_to_temp[0]);
-			for (int i = 1; str_to_temp[i] != '|'; i++) {
-				printf("%c",str_to_temp[i]);
-			}
+			for (int i = 1; str_to_temp[i] != '|'; i++) printf("%c",str_to_temp[i]);
 			printf("\n");
 			flag_find = FOUND;
 		}
 	}
 	if (flag_find){
-		printf("Please select the music you wanna listen.(input number)\n");
-		int sign_of_music = 0;
-		scanf("%d", &sign_of_music);
+		printf("Please select the music you wanna listen.(input title)\n");
+		char title[63];
+		scanf("%s", &title);
 		//play that music and roll lysics.
 		//play();
-		//rolllysic();
+
+		const char* lrc = ".lrc";  //show lysics
+		char newpath[260] = { '\0' };
+		substring(newpath, oldpath, 0, strlen(oldpath) - 13);
+		strcat(newpath, title);
+		strcat(newpath, lrc);
+		readlrc(newpath);
 		return 0;
 	}
 	else if (!flag_find){
@@ -331,6 +381,7 @@ orderLOOP:	printf("Please press:\n1 for refresh the library.\n2 for search by ti
 	else if (order == 50){
 		//search by title
 		schtit(oldpath, mlib);
+		getchar();
 		fflush(stdin);
 		printf("///////////////////////////////////////\n");
 		goto orderLOOP;
@@ -338,6 +389,7 @@ orderLOOP:	printf("Please press:\n1 for refresh the library.\n2 for search by ti
 	else if (order == 51){
 		//search by artists
 		schart(oldpath, mlib);
+		getchar();
 		fflush(stdin);
 		printf("///////////////////////////////////////\n");
 		goto orderLOOP;
@@ -351,3 +403,5 @@ orderLOOP:	printf("Please press:\n1 for refresh the library.\n2 for search by ti
 	system("pause");
 	return 0;
 }
+
+//                  <-2015/5/4 0;45 我想要更好更圆的月亮 想要未知的疯狂 想要声色的张扬->
